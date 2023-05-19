@@ -76,7 +76,7 @@ def evaluate_word(word, colors, word_list):
                     else:
                         #Remove all occurences of letter except at green positions
                         green_positions = []
-                        for occurence in letter:
+                        for occurence in letters[letter]:
                             if occurence[1] == "Green":
                                 green_positions.append(occurence[0])
                         letter_pos = 0
@@ -93,27 +93,15 @@ with open("answers.txt", 'r') as filehandle:
         current_word = line[:-1]
         possible_words.append(current_word)
 
-input_word = "horse"
-input_colors = ["Gray", "Gray", "Gray", "Yellow", "Gray"]
+input_word = "aback"
+input_colors = ["Yellow", "Gray", "Gray", "Yellow", "Gray"]
 evaluate_word(input_word, input_colors, possible_words)
 
-input_word = "assay"
-input_colors = ["Gray", "Yellow", "Gray", "Gray", "Gray"]
+input_word = "cacao"
+input_colors = ["Green", "Green", "Gray", "Gray", "Yellow"]
 evaluate_word(input_word, input_colors, possible_words)
 
-input_word = "ficus"
-input_colors = ["Gray", "Yellow", "Gray", "Gray", "Yellow"]
-evaluate_word(input_word, input_colors, possible_words)
-
-input_word = "skill"
-input_colors = ["Green", "Gray", "Green", "Green", "Green"]
-evaluate_word(input_word, input_colors, possible_words)
-
-input_word = "spill"
-input_colors = ["Green", "Gray", "Green", "Green", "Green"]
-evaluate_word(input_word, input_colors, possible_words)
-
-input_word = "still"
+input_word = "canoe"
 input_colors = ["Green", "Green", "Green", "Green", "Green"]
 evaluate_word(input_word, input_colors, possible_words)
 
