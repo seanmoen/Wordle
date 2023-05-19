@@ -1,3 +1,8 @@
+#Sean Moen
+#May 19, 2023
+#A program to give possible Wordle words after given input
+#TODO: Add a visual way to input, possibly through a webapp
+
 def green_letter(letter, position, word_list):
     word_list[:] = [word for word in word_list if word[position] == letter]
 
@@ -26,18 +31,13 @@ def evaluate_word(word, colors, word_list):
         if word[letter_pos] not in letters:
             letters[word[letter_pos]] = []
         letters[word[letter_pos]].append([letter_pos, colors[letter_pos]])
-        letter_pos += 1
-    print(letters)
-    
+        letter_pos += 1    
     #Evaluate
     for letter in letters:
-        word_count = len(word_list)
-        print(word_count)
         #If only one letter
         if len(letters[letter]) == 1:
             letter_pos = letters[letter][0][0]
             letter_color = letters[letter][0][1]
-            print("Checking letter: " + letter + " which is at: " + str(letter_pos) + " and is the color " + letter_color)  
             #Easiest case, only one letter occurence
             if letter_color == "Green":
                 green_letter(letter, letter_pos, word_list)
@@ -47,13 +47,12 @@ def evaluate_word(word, colors, word_list):
                 gray_letter(letter, word_list)
         #Multiple letters
         else:
+            #Check if all letters are gray or if there is a yellow
             has_yellow = False
             is_all_gray = True
-            #Check if any letters are gray
             for occurence in letters[letter]:
                 position = occurence[0]
                 color = occurence[1]
-                print("Checking letter:" + letter + " at position: " + str(position) + " which is: " + color)
                 if color == "Yellow":
                     has_yellow = True
                 if color != "Gray":
@@ -65,15 +64,6 @@ def evaluate_word(word, colors, word_list):
                     green_letter(letter, position, word_list)
                 elif color == "Yellow":
                     yellow_letter(letter, position, word_list)
-                #If all gray letters - that letter is not in word
-                #If there is only green and gray - only that amount of letters
-                #   remove all except at green
-                #If there is yellow and gray, - letter is not at gray
-                #   normal yellow and single gray suffices
-                #   because
-
-                #Note: green and yellow will have done their code for their own letters
-                #Gray's behavior is based off the presence of the other letters
                 else:
                     if is_all_gray:
                         #Remove all occurences of letter
@@ -84,6 +74,7 @@ def evaluate_word(word, colors, word_list):
                         gray_letter_single_spot(letter, position, word_list)
                     #Is green and gray, keep green get rid of rest 
                     else:
+                        #Remove all occurences of letter except at green positions
                         green_positions = []
                         for occurence in letter:
                             if occurence[1] == "Green":
@@ -93,49 +84,39 @@ def evaluate_word(word, colors, word_list):
                             if letter_pos not in green_positions:
                                 gray_letter_single_spot(letter, letter_pos, word_list)
                             letter_pos += 1
-            print(occurence)
-        print("Dropped words: " + str(word_count - len(word_list)))
-    return letters
 
 #Input file
-
 possible_words = []
-#possible_words = ["avata", "betas", "charl", "delta", "epsil", "fable", "bounce"]
-
-
-with open("C:\\Users\\Sean Moen\\vscode\\Wordle\\answers.txt", 'r') as filehandle:
+with open("answers.txt", 'r') as filehandle:
     filecontents = filehandle.readlines()
-
     for line in filecontents:
         current_word = line[:-1]
         possible_words.append(current_word)
 
-print(len(possible_words))
-
 input_word = "horse"
 input_colors = ["Gray", "Gray", "Gray", "Yellow", "Gray"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
 input_word = "assay"
 input_colors = ["Gray", "Yellow", "Gray", "Gray", "Gray"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
 input_word = "ficus"
 input_colors = ["Gray", "Yellow", "Gray", "Gray", "Yellow"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
 input_word = "skill"
 input_colors = ["Green", "Gray", "Green", "Green", "Green"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
 input_word = "spill"
 input_colors = ["Green", "Gray", "Green", "Green", "Green"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
 input_word = "still"
 input_colors = ["Green", "Green", "Green", "Green", "Green"]
-print(evaluate_word(input_word, input_colors, possible_words))
+evaluate_word(input_word, input_colors, possible_words)
 
-print(len(possible_words))
+print("Total possible words: " + str(len(possible_words)))
 
 print(possible_words)
