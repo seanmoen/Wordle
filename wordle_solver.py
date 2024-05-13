@@ -19,6 +19,10 @@ def yellow_letter(letter, position, word_list):
     #Get rid of all words with letter at that spot
     word_list[:] = [word for word in word_list if word[position] != letter]
 
+def remove_not_enough_letters(letter, num_occurences, word_list):
+    #Check amount of letters in word and remove if its not enough
+    word_list[:] = [word for word in word_list if word.count(letter) > num_occurences]
+
 def evaluate_word(word, colors, word_list):
     word = word.lower()
     #letters is a dictionary of a list of lists
@@ -47,16 +51,18 @@ def evaluate_word(word, colors, word_list):
                 gray_letter(letter, word_list)
         #Multiple letters
         else:
-            #Check if all letters are gray or if there is a yellow
+            #Check if any letters are yellow and the min amount of letters in the word
             has_yellow = False
-            is_all_gray = True
+            min_letters_in_word = 0
             for occurence in letters[letter]:
                 position = occurence[0]
                 color = occurence[1]
                 if color == "Yellow":
                     has_yellow = True
                 if color != "Gray":
-                    is_all_gray = False                 
+                    min_letters_in_word += 1
+            #remove all words with less than letters in the word
+            #remove_not_enough_letters(letter, min_letters_in_word, word_list)             
             for occurence in letters[letter]:
                 position = occurence[0]
                 color = occurence[1]
@@ -65,14 +71,16 @@ def evaluate_word(word, colors, word_list):
                 elif color == "Yellow":
                     yellow_letter(letter, position, word_list)
                 else:
-                    if is_all_gray:
+                    #Is all gray
+                    if min_letters_in_word == 0:
                         #Remove all occurences of letter
                         gray_letter(letter, word_list)
                     #is gray, yellow, and possibly green
                     elif has_yellow:
                         #Remove current spot as letter cannot be there
                         gray_letter_single_spot(letter, position, word_list)
-                    #Is green and gray, keep green get rid of rest 
+                    #Is green and gray, keep green get rid of rest
+                    #Only green and gray
                     else:
                         #Remove all occurences of letter except at green positions
                         green_positions = []
