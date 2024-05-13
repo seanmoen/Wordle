@@ -1,5 +1,6 @@
 #Sean Moen
-#May 19, 2023
+# May 19, 2023
+# May 13, 2024 refactor
 #Test cases for wordlesolver
 
 #https://www.dataquest.io/blog/unit-tests-python/
@@ -54,7 +55,7 @@ class TestClass(unittest.TestCase):
         self.assertEqual(word_list, ["trees", "tests", "waste", "plans", "haste"])
 
     def test_green_and_gray(self):
-        word_list = [ "haste", "cacao", "cream"]
+        word_list = ["haste", "cacao", "cream"]
         word = "cacao"
         colors = ["Green", "Gray", "Gray", "Green", "Gray"]
         evaluate_word(word, colors, word_list)
@@ -73,8 +74,6 @@ class TestClass(unittest.TestCase):
         colors = ["Yellow", "Gray", "Gray", "Gray", "Green"]
         evaluate_word(word, colors, word_list)
         self.assertEqual(word_list, ["laece"])
-
-        
 
 if __name__ == '__main__':
     unittest.main()

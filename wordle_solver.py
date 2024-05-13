@@ -1,6 +1,7 @@
 #Sean Moen
-#May 19, 2023
-#A program to give possible Wordle words after given input
+# May 19, 2023
+# May 13, 2024 refactor
+# A program to give possible Wordle words after given input
 #TODO: Add a visual way to input, possibly through a webapp
 
 def green_letter(letter, position, word_list):
@@ -21,98 +22,98 @@ def yellow_letter(letter, position, word_list):
 
 def remove_not_enough_letters(letter, num_occurences, word_list):
     #Check amount of letters in word and remove if its not enough
-    word_list[:] = [word for word in word_list if word.count(letter) > num_occurences]
+    word_list[:] = [word for word in word_list if word.count(letter) >= num_occurences]
+
+def remove_too_many_letters(letter, num_occurences, word_list):
+    #Check amount of letters in word and remove if its not enough
+    word_list[:] = [word for word in word_list if word.count(letter) <= num_occurences]
+
+class Letter:
+    def __init__(self, character, color, position):
+        self.character = character
+        self.color = color
+        self.position = position
 
 def evaluate_word(word, colors, word_list):
     word = word.lower()
-    #letters is a dictionary of a list of lists
-    #one list for each occurence of letter
-    #each occurence contains letter position and its color
-    letters = {}
+    #letters is a list of letters
+    letters = []
+    unique_letters = []
     letter_pos = 0
     while letter_pos < len(word):
-        #Add letter to dictionary if it is not there
-        if word[letter_pos] not in letters:
-            letters[word[letter_pos]] = []
-        letters[word[letter_pos]].append([letter_pos, colors[letter_pos]])
+        letter = Letter(word[letter_pos], colors[letter_pos], letter_pos)
+        letters.append(letter)
+        if word[letter_pos] not in unique_letters:
+            unique_letters.append(word[letter_pos])
         letter_pos += 1    
-    #Evaluate
-    for letter in letters:
-        #If only one letter
-        if len(letters[letter]) == 1:
-            letter_pos = letters[letter][0][0]
-            letter_color = letters[letter][0][1]
-            #Easiest case, only one letter occurence
-            if letter_color == "Green":
-                green_letter(letter, letter_pos, word_list)
-            if letter_color == "Yellow":
-                yellow_letter(letter, letter_pos, word_list)
-            if letter_color == "Gray":
-                gray_letter(letter, word_list)
-        #Multiple letters
-        else:
-            #Check if any letters are yellow and the min amount of letters in the word
-            has_yellow = False
-            min_letters_in_word = 0
-            for occurence in letters[letter]:
-                position = occurence[0]
-                color = occurence[1]
-                if color == "Yellow":
-                    has_yellow = True
-                if color != "Gray":
-                    min_letters_in_word += 1
-            #remove all words with less than letters in the word
-            #remove_not_enough_letters(letter, min_letters_in_word, word_list)             
-            for occurence in letters[letter]:
-                position = occurence[0]
-                color = occurence[1]
-                if color == "Green":
-                    green_letter(letter, position, word_list)
-                elif color == "Yellow":
-                    yellow_letter(letter, position, word_list)
+
+    for unique_letter in unique_letters:
+        has_non_gray = False
+        min_letters_in_answer = 0
+        max_letters_in_answer = len(word)
+        occurences = []
+        for letter in letters:
+            if letter.character == unique_letter:
+                occurences.append(letter)
+                if letter.color == "Yellow" or letter.color == "Green":
+                    has_non_gray = True
+                if letter.color == "Gray":
+                    max_letters_in_answer -= 1
                 else:
-                    #Is all gray
-                    if min_letters_in_word == 0:
-                        #Remove all occurences of letter
-                        gray_letter(letter, word_list)
-                    #is gray, yellow, and possibly green
-                    elif has_yellow:
-                        #Remove current spot as letter cannot be there
-                        gray_letter_single_spot(letter, position, word_list)
-                    #Is green and gray, keep green get rid of rest
-                    #Only green and gray
-                    else:
-                        #Remove all occurences of letter except at green positions
-                        green_positions = []
-                        for occurence in letters[letter]:
-                            if occurence[1] == "Green":
-                                green_positions.append(occurence[0])
-                        letter_pos = 0
-                        while letter_pos < len(word):
-                            if letter_pos not in green_positions:
-                                gray_letter_single_spot(letter, letter_pos, word_list)
-                            letter_pos += 1
+                    min_letters_in_answer += 1
 
-#Input file
-possible_words = []
-with open("answers.txt", 'r') as filehandle:
-    filecontents = filehandle.readlines()
-    for line in filecontents:
-        current_word = line[:-1]
-        possible_words.append(current_word)
+        #remove all words with less than letters in the word
+        remove_not_enough_letters(unique_letter, min_letters_in_answer, word_list)
+        remove_too_many_letters(unique_letter, max_letters_in_answer, word_list)
+        for occurence in occurences:
+            # For single green and multiple green occurences
+            if occurence.color == "Green":
+                green_letter(occurence.character, occurence.position, word_list)
+            # For single Yellow occurence
+            elif occurence.color == "Yellow" and len(occurences) == 1:
+                yellow_letter(occurence.character, occurence.position, word_list)
+            # For Yellow with multiple occurences
+            elif occurence.color == "Yellow":
+                gray_letter_single_spot(occurence.character, occurence.position, word_list)
+            # Only Gray
+            elif occurence.color == "Gray" and not has_non_gray:
+                gray_letter(occurence.character, word_list)
+            # For Gray with Yellow and/or Green
+            elif occurence.color == "Gray" and has_non_gray:
+                #Remove current spot as letter cannot be there
+                gray_letter_single_spot(occurence.character, occurence.position, word_list)
 
-input_word = "aback"
-input_colors = ["Yellow", "Gray", "Gray", "Yellow", "Gray"]
-evaluate_word(input_word, input_colors, possible_words)
-
-input_word = "cacao"
-input_colors = ["Green", "Green", "Gray", "Gray", "Yellow"]
-evaluate_word(input_word, input_colors, possible_words)
-
-input_word = "canoe"
-input_colors = ["Green", "Green", "Green", "Green", "Green"]
-evaluate_word(input_word, input_colors, possible_words)
-
-print("Total possible words: " + str(len(possible_words)))
-
-print(possible_words)
+if __name__ == "__main__":
+    #Input file
+    possible_words = []
+    with open("answers.txt", 'r') as filehandle:
+        filecontents = filehandle.readlines()
+        for line in filecontents:
+            current_word = line[:-1]
+            possible_words.append(current_word)
+    while (len(possible_words) > 1):
+        word = ""
+        while len(word) != 5:
+            word = input("Enter a 5-letter word: ")
+        color_string = ""
+        valid_color = False      
+        while not valid_color:
+            color_string = input("Enter the first letter of each color (green = g, yellow = y, black = b): ")
+            colors = []
+            for letter in color_string:
+                if letter == "g":
+                    colors.append("Green")
+                if letter == "y":
+                    colors.append("Yellow")
+                if letter == "b":
+                    colors.append("Gray")
+            if len(colors) == 5:
+                valid_color = True
+        evaluate_word(word, colors, possible_words)
+        if len(possible_words) > 1:
+            print("Possible Words:")
+            print(possible_words)
+        elif len(possible_words) == 1:
+            print(f"The word is: {possible_words[0]}")
+        else:
+            print("No possible words. (Perhaps a misinput?)")
